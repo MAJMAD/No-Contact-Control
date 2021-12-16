@@ -72,15 +72,26 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     UArray = [0, 0, 0, 0, 0]
     VArray = [0, 0, 0, 0, 0]
     while reading:
-        sleep(0.2)
+        sleep(0.15)
         lock = 0
+        badmoves = 0
         for value in range(0,4):
             UArray[value] = UArray[value+1]
             VArray[value] = VArray[value+1]
         UArray[4] = Usensor.value
         VArray[4] = Vsensor.value
+        if UArray[4] == 1:
+            UArray = [1,1,1,1,1]
+        if VArray[4] == 1:
+            VArray = [1,1,1,1,1]
+        if UArray[4] != 1 and (UArray == [1,1,1,1,Usensor.value] or UArray == [0,0,0,0,Usensor.value]):
+            UArray[0], UArray[1], UArray[2], UArray[3] = UArray[4],UArray[4],UArray[4],UArray[4]
+        if VArray[4] != 1 and (VArray == [1,1,1,1,Vsensor.value] or VArray == [0,0,0,0,Vsensor.value]):
+            VArray[0], VArray[1], VArray[2], VArray[3] = VArray[4],VArray[4],VArray[4],VArray[4]
         Uval = sum(UArray)/5
         Vval = sum(VArray)/5
+        print(UArray)
+        print(VArray)
         print("U axis: " + str(Uval))
         print("V axis: " + str(Vval))
         if Uval > 0.9 or Uval < 0.1:
@@ -93,50 +104,62 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
             greenPin2.off()
             redPin2.on()
             lock += 10
-        if pidevice.qVMO(('U', 'V'), (Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5))) == False:
-            badmoves = 1
+        if lock == 0:
+            bluePin1.off()
+            greenPin1.on()
+            redPin1.off()
+            bluePin2.off()
+            greenPin2.on()
+            redPin2.off()
+            if pidevice.qVMO(('U', 'V'), (Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5))) == False:
+                badmoves = 100;
+        if lock == 1:
+            if pidevice.qVMO(('U', 'V'), (pidevice.qPOS('U')['U'],Vmaxdist*(Vval-0.5))) == False:
+                badmoves = 1
+            else: badmoves = -1
+        if lock == 10:
+            print(pidevice.qPOS('V'))
+            if pidevice.qVMO(('U', 'V'), (Umaxdist*(Uval-0.5),pidevice.qPOS('V')['V'])) == False:
+                badmoves = 10
+            else: badmoves = -10
         if lock == 0 and badmoves == 0:
-            redOff()
-            blueOff()
-            greenOn()
             pidevice.MOV(('U','V'), (Umaxdist*(Uval-0.5), Vmaxdist*(Vval-0.5)))#
             WaitForMotionDone(pidevice, 'U')
             WaitForMotionDone(pidevice, 'V')
         if lock == 0 and badmoves == 1:
-            redOff()
-            blueOff()
-            greenOn()
             tar = pidevice.qTRA(('U', 'V'), (Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5)))
             tar['U'], tar['V'] = truncate(tar['U'], 1), truncate(tar['V'], 1)
             pidevice.MOV(('U','V'), (tar['U'], tar['V']))
             WaitForMotionDone(pidevice, 'U')
             WaitForMotionDone(pidevice, 'V')
-        elif lock == 1:
+        if lock == 1 and badmoves == -1:
             bluePin2.off()
-            redPin2.off()
             greenPin2.on()
-            goodmove = pidevice.qVMO(('V',), (Vmaxdist*(Vval-0.5),))
-            if goodmove == False:
-                tar = pidevice.qTRA(('V',), (Vmaxdist*(Vval-0.5),))
-                tar['V'] = truncate(tar['V'], 1)
-                pidevice.MOV(('V'),(tar['V'])) ###############errored out
-                WaitForMotionDone(pidevice, 'V')
-            else:
-                pidevice.MOV(('V',),(Vmaxdist*(Vval-0.5),))
-                WaitForMotionDone(pidevice, 'V')
-        elif lock == 10:
+            redPin2.off()
+            pidevice.MOV(('V'),(Vmaxdist*(Vval-0.5)))
+            WaitForMotionDone(pidevice, 'V')
+        if lock == 1 and badmoves == 1:
+            bluePin2.off()
+            greenPin2.on()
+            redPin2.off()
+            tar = pidevice.qTRA(('V'), (Vmaxdist*(Vval-0.5)))
+            tar['V'] = truncate(tar['V'], 1)
+            pidevice.MOV(('V'),(tar['V'])) 
+            WaitForMotionDone(pidevice, 'V')
+        if lock == 10 and badmoves == -10:
             bluePin1.off()
-            redPin1.off()
             greenPin1.on()
-            goodmove = pidevice.qVMO(('U',), (Umaxdist*(Uval-0.5),))
-            if goodmove == False:
-                tar = pidevice.qTRA(('U',), (Umaxdist*(Uval-0.5),))
-                tar['U'] = truncate(tar['U'], 1)
-                pidevice.MOV(('U',),(tar['U'],))
-                WaitForMotionDone(pidevice, 'U')
-            else:
-                pidevice.MOV(('U',),(Umaxdist*(Uval-0.5),))
-                WaitForMotionDone(pidevice, 'U')
+            redPin1.off()
+            pidevice.MOV(('U',),(Umaxdist*(Uval-0.5),))
+            WaitForMotionDone(pidevice, 'U')
+        if lock == 10 and badmoves == 10:
+            bluePin1.off()
+            greenPin1.on()
+            redPin1.off()
+            tar = pidevice.qTRA(('U'), (Umaxdist*(Uval-0.5)))
+            tar['U'] = truncate(tar['U'], 1)
+            pidevice.MOV(('U'),(tar['U']))
+            WaitForMotionDone(pidevice, 'U')
         else:
             pass
         if lastUVal == Uval and lastVVal == Vval:
@@ -184,7 +207,7 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     isRunning = False
                     counter = 0
                     retrigger = 0
-    
+                    
 def WaitForMotionDone(device, axis):
     isMoving = True
     while isMoving:
