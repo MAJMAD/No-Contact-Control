@@ -19,8 +19,8 @@ HOME = [0,0,0,0,0,0]
 redPin1 = LED(22)
 greenPin1 = LED(27)
 bluePin1 = LED(17)
-redPin2 = LED(16)
-greenPin2 = LED(20) 
+redPin2 = LED(20)
+greenPin2 = LED(16) 
 bluePin2 = LED(21)
 
 # def blink(pin):
@@ -83,14 +83,22 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     lastVVal = 0
     retrigger = 0
     badmoves = 0
+    UArray = [0, 0, 0, 0, 0]
+    VArray = [0, 0, 0, 0, 0]
     while reading:
         #print(truncate(pidevice.qPOS('X')['X'], 4), truncate(pidevice.qPOS('Y')['Y'], 4), truncate(pidevice.qPOS('Z')['Z'], 4), truncate(pidevice.qPOS('U')['U'], 4), truncate(pidevice.qPOS('V')['V'], 4), truncate(pidevice.qPOS('W')['W'], 4))
-        sleep(0.1)
+        sleep(0.2)
         lock = 0
-        Uval = Usensor.value
-        Vval = Vsensor.value
-        #print(Uval)
-        #print(Vval)
+        for value in range(0,4):
+            UArray[value] = UArray[value+1]
+            VArray[value] = VArray[value+1]
+            #print(value)
+        UArray[4] = Usensor.value
+        VArray[4] = Vsensor.value
+        Uval = sum(UArray)/5
+        Vval = sum(VArray)/5
+        print("U axis: " + str(Uval))
+        print("V axis: " + str(Vval))
         if Uval > 0.9 or Uval < 0.1:
             bluePin1.off()
             greenPin1.off()
@@ -187,7 +195,8 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
 #             print("Finished Deadzone V Moves")
             #sleep(0.2)
         else:
-             print("Deadzone")
+            pass
+             #print("Deadzone")
 #             print("Billys Great")
 #             print("Finished Deadzone")
             #sleep(0.2)
