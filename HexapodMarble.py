@@ -124,6 +124,8 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
             greenPin2.off()
             redPin2.on()
             lock += 10
+        if Uval < 0.075 and Vval < 0.075:
+            pidevice.MOV(['U','V'],[14.95,0])
         if lock == 0:
             bluePin1.off()
             greenPin1.on()
@@ -134,12 +136,12 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
             if pidevice.qVMO(('U', 'V'), (Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5))) == False:
                 badmoves = 100;
         if lock == 1:
-            if pidevice.qVMO(('U', 'V'), (pidevice.qMOV('U')['U'],Vmaxdist*(Vval-0.5))) == False:
+            if pidevice.qVMO(('U', 'V'), (pidevice.qPOS('U')['U'],Vmaxdist*(Vval-0.5))) == False:
                 badmoves = 1
             else: badmoves = -1
         if lock == 10:
             #print(pidevice.qPOS('V'))
-            if pidevice.qVMO(('U', 'V'), (Umaxdist*(Uval-0.5),pidevice.qMOV('V')['V'])) == False:
+            if pidevice.qVMO(('U', 'V'), (Umaxdist*(Uval-0.5),pidevice.qPOS('V')['V'])) == False:
                 badmoves = 10
             else: badmoves = -10
         if lock == 0 and badmoves == 0:
@@ -296,16 +298,16 @@ def main():
     #lean to reveal maze orientation
     pidevice.MOV('X', 0)
     pidevice.MOV('Y', 0)
-    pidevice.MOV('U', 14)
     pidevice.MOV('V', 0)
     pidevice.MOV('Z', 0)
     pidevice.MOV('W', 0)
     WaitForMotionDone(pidevice, 'X')
     WaitForMotionDone(pidevice, 'Y')
-    WaitForMotionDone(pidevice, 'U')
     WaitForMotionDone(pidevice, 'V')
     WaitForMotionDone(pidevice, 'Z')
     WaitForMotionDone(pidevice, 'W')
+    pidevice.MOV('U', 14)
+    WaitForMotionDone(pidevice, 'U')
     sleep(10.0)
     #return to origin
     pidevice.MOV('X', 0)
@@ -320,11 +322,12 @@ def main():
     WaitForMotionDone(pidevice, 'V')
     WaitForMotionDone(pidevice, 'Z')
     WaitForMotionDone(pidevice, 'W')
-    umin = -15
-    umax = 15
-    vmin = -15
-    vmax = 15
+    umin = -12
+    umax = 12
+    vmin = -12
+    vmax = 12
     yellowOff()
+    pidevice.VLS(10)
     try:
         reader = Thread(target=read_distance(pidevice, umax-umin, vmax-vmin), daemon=True)
         reader.start()
