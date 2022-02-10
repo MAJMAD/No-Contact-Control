@@ -29,7 +29,7 @@ while loopcounter < 1000:
 
       print("Waiting for sensor to settle")
 
-      time.sleep(1)
+      time.sleep(0.6)
 
       print("Calculating distance")
 
@@ -42,8 +42,13 @@ while loopcounter < 1000:
       echo_start_time = time.time()
 
       while GPIO.input(PIN_ECHO1)== 0 or GPIO.input(PIN_ECHO2)== 0 :
-            (pulse1_start_time, pulse2_start_time) = (time.time(), time.time())
-            if time.time() - echo_start_time > 0.50:
+            pulse1start= time.time()
+            pulse2start=pulse1start
+            if GPIO.input(PIN_ECHO1)== 0:
+                pulse1_start_time = pulse1start
+            if GPIO.input(PIN_ECHO2)== 0:
+                pulse2_start_time = pulse2start
+            if time.time() - echo_start_time > 0.5:
                 print("Trigger missed, resending trigger")
                 missedtriggers+=1
                 GPIO.output(trigs, GPIO.HIGH)
@@ -52,7 +57,11 @@ while loopcounter < 1000:
                 echo_start_time = time.time()
             #print("Echos low")
       while GPIO.input(PIN_ECHO1)== 1 or GPIO.input(PIN_ECHO2)== 1:
-            (pulse1_end_time, pulse2_end_time) = (time.time(), time.time())
+            pulse1end, pulse2end = time.time(), time.time()
+            if GPIO.input(PIN_ECHO1)== 1:
+              pulse1_end_time = pulse1end
+            if GPIO.input(PIN_ECHO2)== 1:
+                pulse2_end_time = pulse2end
             #print("Echos high")
 
       pulse1_duration = pulse1_end_time - pulse1_start_time
@@ -68,10 +77,10 @@ while loopcounter < 1000:
       print("Distance 1:",distance1,"cm")
       print("Distance 2:",distance2,"cm")
       
-      if distance1 - lastdistance1 > 0.08*lastdistance1 or distance1 - lastdistance1 < -0.08*lastdistance1:
+      if distance1 - lastdistance1 > 2.0 or distance1 - lastdistance1 < -2.0:
           sensor1misreads+=1
           
-      if distance2 - lastdistance2 > 0.08*lastdistance2 or distance2 - lastdistance2 < -0.08*lastdistance2:
+      if distance2 - lastdistance2 > 2.0 or distance2 - lastdistance2 < -2.0:
           sensor2misreads+=1
       
       lastdistance1, lastdistance2 = distance1,distance2
