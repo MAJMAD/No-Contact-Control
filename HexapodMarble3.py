@@ -63,7 +63,6 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     retrigger = 0
     pidevice.MOV(['U','V'], [0,0])
     while reading:
-        readcount += 1
         lock = 0
         newreading = 1
         if ser.in_waiting > 0:
@@ -86,7 +85,7 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
         blueOff()
         greenOn()
         #Motion Control
-        if Uval < 0.075 and Vval < 0.075 and readcount > 100:
+        if Uval < 0.075 and Vval < 0.075:
             pidevice.MOV(['U','V'],[14.95,0])
             sleep(1)
             pidevice.MOV(['U','V'],[0,0])
