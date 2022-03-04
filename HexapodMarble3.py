@@ -56,12 +56,11 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
     ser.reset_input_buffer()
     counter = 0
-    lastUVal = 0.09
-    lastVVal = 0.09
+    lastUVal = 0.5
+    lastVVal = 0.5
     Uval = 0
     Vval = 0
     retrigger = 0
-    readcount = 0
     pidevice.MOV(['U','V'], [0,0])
     while reading:
         readcount += 1
