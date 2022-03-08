@@ -1,0 +1,231 @@
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+SPI R 0 S 0 T 0 
+MOV X 50 
+WAC ONT? X = 1 
+MOV X -50 
+WAC ONT? X = 1 
+MOV X 0 
+WAC ONT? X = 1 
+MOV Y 50 
+WAC ONT? Y = 1 
+MOV Y -50 
+WAC ONT? Y = 1 
+MOV Y 0 
+WAC ONT? Y = 1 
+MOV Z 25 
+WAC ONT? Z = 1 
+MOV Z -25 
+WAC ONT? Z = 1 
+MOV Z 0 
+WAC ONT? Z = 1 
+MOV U 15 
+WAC ONT? U = 1 
+MOV U -15 
+WAC ONT? U = 1 
+MOV U 0 
+WAC ONT? U = 1 
+MOV V 15 
+WAC ONT? V = 1 
+MOV V -15 
+WAC ONT? V = 1 
+MOV V 0 
+WAC ONT? V = 1 
+MOV W 30 
+WAC ONT? W = 1 
+MOV W -30 
+WAC ONT? W = 1 
+MOV W 0 
+WAC ONT? W = 1 
+MOV X -15 Y 0 Z -10 U -6 V 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WTR 1 30 1 2 30 1 3 30 1 4 30 1 5 30 1 
+WGC 1 3 2 3 3 3 4 3 5 3 
+WGO 1 1 2 1 3 1 4 1 5 1 
+WAC WGO? 1 = 0 
+WAC WGO? 2 = 0 
+WAC WGO? 3 = 0 
+WAC WGO? 4 = 0 
+WAC WGO? 5 = 0 
+WAC WGO? 6 = 0 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WTR 4 40 1 5 40 1 
+WGC 4 2 5 2 
+DEL 100 
+SPI R 0 S 0 T 0 
+MOV X 0 Y 0 Z 0 U -6 V 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WGO 4 1 5 1 
+WAC WGO? 1 = 0 
+WAC WGO? 2 = 0 
+WAC WGO? 3 = 0 
+WAC WGO? 4 = 0 
+WAC WGO? 5 = 0 
+WAC WGO? 6 = 0 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+SPI R 0 S 125 T 58 
+MOV X 0 Y 0 Z 0 U -6 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WGO 4 1 5 1 
+WAC WGO? 1 = 0 
+WAC WGO? 2 = 0 
+WAC WGO? 3 = 0 
+WAC WGO? 4 = 0 
+WAC WGO? 5 = 0 
+WAC WGO? 6 = 0 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+SPI R 125 S 0 T 58 
+MOV X 0 Y 0 Z 0 U -6 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WGO 4 1 5 1 
+WAC WGO? 1 = 0 
+WAC WGO? 2 = 0 
+WAC WGO? 3 = 0 
+WAC WGO? 4 = 0 
+WAC WGO? 5 = 0 
+WAC WGO? 6 = 0 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+SPI R 0 S -125 T 58 
+MOV X 0 Y 0 Z 0 U -6 V 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WGO 4 1 5 1 
+WAC WGO? 1 = 0 
+WAC WGO? 2 = 0 
+WAC WGO? 3 = 0 
+WAC WGO? 4 = 0 
+WAC WGO? 5 = 0 
+WAC WGO? 6 = 0 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+SPI R -125 S 0 T 58 
+MOV X 0 Y 0 Z 0 U -6 V 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+WGO 4 1 5 1 
+WAC WGO? 1 = 0 
+WAC WGO? 2 = 0 
+WAC WGO? 3 = 0 
+WAC WGO? 4 = 0 
+WAC WGO? 5 = 0 
+WAC WGO? 6 = 0 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+MOV X 0 Y 0 Z 0 U 0 V 0 W 0 
+WAC ONT? X = 1 
+WAC ONT? Y = 1 
+WAC ONT? Z = 1 
+WAC ONT? U = 1 
+WAC ONT? V = 1 
+WAC ONT? W = 1 
+SPI R 0 S 0 T 0
+MAC START MOTION
