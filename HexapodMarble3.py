@@ -12,7 +12,7 @@ reading = True
 AXES = ["X", "Y", "Z", "U", "V", "W"]
 HOME = [0,0,0,0,0,0]
 HEXAPODRANGE = 8
-HEXAPODVELOCITY = 50
+HEXAPODVELOCITY = 20
 redPin1 = LED(22)
 greenPin1 = LED(27)
 bluePin1 = LED(17)
@@ -58,8 +58,8 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     counter = 0
     lastUVal = 0.5
     lastVVal = 0.5
-    Uval = 0
-    Vval = 0
+    Uval = 0.5
+    Vval = 0.5
     retrigger = 0
     pidevice.MOV(['U','V'], [0,0])
     while reading:
@@ -103,6 +103,11 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
         lastUVal, lastVVal = Uval, Vval
         #Macro Functionality
         if counter >= 5000:
+            #LED Control
+            redOff()
+            greenOff()
+            blueOn()
+            pidevice.VLS(50)
             pidevice.MAC_START("MOTION")
             isRunning = True
             while isRunning:
@@ -157,6 +162,7 @@ def ConnectController():
     return gateway, messages, gcs
 
 def main():
+    sleep(40)
     yellowOn()
     gateway, messages, pidevice = ConnectController()
     #Transport Position Facilitation
@@ -167,7 +173,7 @@ def main():
     WaitForMotionDone(pidevice, 'V')
     WaitForMotionDone(pidevice, 'Z')
     WaitForMotionDone(pidevice, 'W')
-    sleep(1.0)
+    sleep(10.0)
     #return to origin
     pidevice.MOV(AXES, HOME)
     WaitForMotionDone(pidevice, 'X')
@@ -189,7 +195,6 @@ def main():
     WaitForMotionDone(pidevice, 'Z')
     WaitForMotionDone(pidevice, 'W')
     umin, umax, vmin, vmax = -HEXAPODRANGE, HEXAPODRANGE, -HEXAPODRANGE, HEXAPODRANGE
-    yellowOff()
     pidevice.VLS(HEXAPODVELOCITY)
     try:
         reader = Thread(target=read_distance(pidevice, umax-umin, vmax-vmin), daemon=True)
