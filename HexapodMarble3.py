@@ -80,6 +80,8 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     Vval = float(line[10:])
                 except:
                     Vval = lastVVal
+            if Uval > 1 or Vval > 1:
+                Uval, Vval = lastUVal, lastVVal
         #LED Control
         redOff()
         blueOff()
