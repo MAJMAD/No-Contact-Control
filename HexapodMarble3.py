@@ -53,6 +53,8 @@ def yellowOff():
     greenOff()
         
 def read_distance(pidevice, Umaxdist, Vmaxdist):
+    yellowOff()
+    greenOn()
     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
     ser.reset_input_buffer()
     counter = 0
@@ -63,11 +65,9 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     retrigger = 0
     pidevice.MOV(['U','V'], [0,0])
     while reading:
-        lock = 0
         newreading = 1
         if ser.in_waiting > 0:
             line = ser.readline().decode('utf-8', 'ignore').rstrip()
-            print(line)
             if len(line) > 15:
                 line = line[:15]
             if line[:10] == "stefan 1: ":
@@ -80,14 +80,13 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     Vval = float(line[10:])
                 except:
                     Vval = lastVVal
-            if Uval > 1 or Vval > 1:
-                Uval, Vval = lastUVal, lastVVal
+            #if Uval > 1 or Vval > 1:
+            #    Uval, Vval = lastUVal, lastVVal
         #LED Control
-        redOff()
         blueOff()
         greenOn()
         #Motion Control
-        if Uval < 0.075 and Vval < 0.075:
+        if Uval < 0.1 and Vval < 0.1:
             pidevice.MOV(['U','V'],[14.95,0])
             sleep(1)
             pidevice.MOV(['U','V'],[0,0])
@@ -99,14 +98,13 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
         if lastUVal == Uval and lastVVal == Vval:
             counter += 1
         elif retrigger == 1: 
-            counter = 5000
+            counter = 6000
         else: counter = 0
         #Next loop setup
         lastUVal, lastVVal = Uval, Vval
         #Macro Functionality
-        if counter >= 5000:
+        if counter >= 6000:
             #LED Control
-            redOff()
             greenOff()
             blueOn()
             pidevice.VLS(50)
@@ -119,12 +117,16 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                 if ser.in_waiting > 0:
                     line = ser.readline().decode('utf-8').rstrip()
                     if line[:10] == "stefan 1: ":
-                        Uval = float(line[10:])
+                        try:
+                            Uval = float(line[10:])
+                        except:
+                            Uval = lastUVal
                     if line[:10] == "marcus 2: ":
-                        Vval = float(line[10:])
-                if Uval > 0.075 and Vval > 0.075:
-                    pass
-                else:
+                        try:
+                            Vval = float(line[10:])
+                        except:
+                            Vval = lastVVal
+                if Uval < 0.1 and Vval < 0.1:
                     pidevice.STP(noraise=True)
                     sleep(2.0)
                     pidevice.MOV(AXES,HOME)
@@ -146,6 +148,7 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     isRunning = False
                     counter = 0
                     retrigger = 0
+                    pidevice.VLS(HEXAPODVELOCITY)
         
 def WaitForMotionDone(device, axis):
     isMoving = True
@@ -164,7 +167,9 @@ def ConnectController():
     return gateway, messages, gcs
 
 def main():
+    redOn()
     sleep(40)
+    redOff()
     yellowOn()
     gateway, messages, pidevice = ConnectController()
     #Transport Position Facilitation
@@ -175,7 +180,7 @@ def main():
     WaitForMotionDone(pidevice, 'V')
     WaitForMotionDone(pidevice, 'Z')
     WaitForMotionDone(pidevice, 'W')
-    sleep(10.0)
+    sleep(25.0)
     #return to origin
     pidevice.MOV(AXES, HOME)
     WaitForMotionDone(pidevice, 'X')
@@ -187,7 +192,7 @@ def main():
     #lean to reveal maze orientation
     pidevice.MOV('U', 14)
     WaitForMotionDone(pidevice, 'U')
-    sleep(10.0)
+    sleep(20.0)
     #return to origin
     pidevice.MOV(AXES, HOME)
     WaitForMotionDone(pidevice, 'X')
