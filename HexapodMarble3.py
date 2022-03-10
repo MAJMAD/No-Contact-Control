@@ -115,7 +115,9 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                 if isRunning == False: 
                     retrigger = 1
                 if ser.in_waiting > 0:
-                    line = ser.readline().decode('utf-8').rstrip()
+                    line = ser.readline().decode('utf-8', 'ignore').rstrip()
+                    if len(line) > 15:
+                        line = line[:15]
                     if line[:10] == "stefan 1: ":
                         try:
                             Uval = float(line[10:])
