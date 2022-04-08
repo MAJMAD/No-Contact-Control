@@ -11,8 +11,9 @@ import serial, time
 reading = True
 AXES = ["X", "Y", "Z", "U", "V", "W"]
 HOME = [0,0,0,0,0,0]
-HEXAPODRANGE = 8
-HEXAPODVELOCITY = 20
+HEXAPODRANGE = 5
+HEXAPODVELOCITY = 10
+
 redPin1 = LED(22)
 greenPin1 = LED(27)
 bluePin1 = LED(17)
@@ -55,53 +56,42 @@ def yellowOff():
 def read_distance(pidevice, Umaxdist, Vmaxdist):
     yellowOff()
     greenOn()
-    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
     ser.reset_input_buffer()
     counter = 0
-    lastUVal = 0.5
-    lastVVal = 0.5
     Uval = 0.5
     Vval = 0.5
     retrigger = 0
+    sensorreadcount = 0
     pidevice.MOV(['U','V'], [0,0])
+    starttime = time.time()
     while reading:
-        newreading = 1
         if ser.in_waiting > 0:
             line = ser.readline().decode('utf-8', 'ignore').rstrip()
-            if len(line) > 15:
-                line = line[:15]
-            if line[:10] == "stefan 1: ":
-                try:
-                    Uval = float(line[10:])
-                except:
-                    Uval = lastUVal
-            if line[:10] == "marcus 2: ":
-                try:
-                    Vval = float(line[10:])
-                except:
-                    Vval = lastVVal
+            try:
+                Uval, Vval = float(line[0:4]), float(line[4:8])
+                sensorreadcount += 1
+            except:
+                Uval, Vval = 0.5, 0.5
         #LED Control
         blueOff()
         greenOn()
-        #Motion Control
+        #Motion Control - Position
+        pidevice.MOV(['U','V'], [Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5)])
         if Uval < 0.1 and Vval < 0.1:
             pidevice.MOV(['U','V'],[14.95,0])
-            sleep(1)
-            pidevice.MOV(['U','V'],[0,0])
-            sleep(1)
-            Uval, Vval = lastUVal, lastVVal
-            ser.reset_input_buffer()
-        pidevice.MOV(['U','V'], [Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5)])
+            sleep(3)
+            for i in range(0,100):
+                line = ser.readline().decode('utf-8', 'ignore').rstrip()
+            Uval, Vval = 0.5, 0.5
         #Macro Setup
-        if lastUVal == Uval and lastVVal == Vval:
+        if Uval == 0.5 and Vval == 0.5:
             counter += 1
         elif retrigger == 1: 
-            counter = 6000
+            counter = 10000
         else: counter = 0
-        #Next loop setup
-        lastUVal, lastVVal = Uval, Vval
         #Macro Functionality
-        if counter >= 6000:
+        if counter >= 10000:
             #LED Control
             greenOff()
             blueOn()
@@ -114,19 +104,13 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     retrigger = 1
                 if ser.in_waiting > 0:
                     line = ser.readline().decode('utf-8', 'ignore').rstrip()
-                    if len(line) > 15:
-                        line = line[:15]
-                    if line[:10] == "stefan 1: ":
-                        try:
-                            Uval = float(line[10:])
-                        except:
-                            Uval = lastUVal
-                    if line[:10] == "marcus 2: ":
-                        try:
-                            Vval = float(line[10:])
-                        except:
-                            Vval = lastVVal
+                    try:
+                        Uval, Vval = float(line[0:4]), float(line[4:8])
+                        sensorreadcount += 1
+                    except:
+                        Uval, Vval = 0.5, 0.5
                 if Uval < 0.1 and Vval < 0.1:
+                    Uval, Vval = 0.5, 0.5
                     pidevice.STP(noraise=True)
                     sleep(2.0)
                     pidevice.MOV(AXES,HOME)
