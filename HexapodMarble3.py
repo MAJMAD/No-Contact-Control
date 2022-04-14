@@ -66,8 +66,10 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
     pidevice.MOV(['U','V'], [0,0])
     starttime = time.time()
     while reading:
+    #while sensorreadcount < 1000:
         if ser.in_waiting > 0:
             line = ser.readline().decode('utf-8', 'ignore').rstrip()
+            #print(line)
             try:
                 Uval, Vval = float(line[0:4]), float(line[4:8])
                 sensorreadcount += 1
@@ -80,7 +82,7 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
         pidevice.MOV(['U','V'], [Umaxdist*(Uval-0.5),Vmaxdist*(Vval-0.5)])
         if Uval < 0.1 and Vval < 0.1:
             pidevice.MOV(['U','V'],[14.95,0])
-            sleep(3)
+            #sleep(3)
             for i in range(0,100):
                 line = ser.readline().decode('utf-8', 'ignore').rstrip()
             Uval, Vval = 0.5, 0.5
@@ -110,7 +112,6 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     except:
                         Uval, Vval = 0.5, 0.5
                 if Uval < 0.1 and Vval < 0.1:
-                    Uval, Vval = 0.5, 0.5
                     pidevice.STP(noraise=True)
                     sleep(2.0)
                     pidevice.MOV(AXES,HOME)
@@ -133,6 +134,10 @@ def read_distance(pidevice, Umaxdist, Vmaxdist):
                     counter = 0
                     retrigger = 0
                     pidevice.VLS(HEXAPODVELOCITY)
+                    for i in range(0,150):
+                        line = ser.readline().decode('utf-8', 'ignore').rstrip()
+                    Uval, Vval = 0.5, 0.5
+    print(1000/(time.time()-starttime))
         
 def WaitForMotionDone(device, axis):
     isMoving = True
