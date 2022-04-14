@@ -11,15 +11,17 @@ uint8_t echoPin2 = 16;
 
 /* define constants */
 const int TIMER_TRIGGER_HIGH = 1;
-const int TIMER_LOW_HIGH = 10;
-const int ARRAY_SIZE = 75;
+const int TIMER_LOW_HIGH = 12;
+const int ARRAY_SIZE = 80;
 const int SENSOR_RANGE = 40;
-const int SENSOR_LOOKBACK = 1000;
-const int DELAY_TIME = 10;
+const int SENSOR_LOOKBACK = 750;
+const int DELAY_TIME = 12;
 const int SMOOTH = 100;
+const int VALIDITYTHRESH = 60;
 const float ARRAY_INIT_VAL = 0;
 const float MAX = SENSOR_RANGE*2/0.034;
 const float HOME = 0.5;
+
 
 /*define the states of an ultrasonic sensor*/
 enum SensorStates {
@@ -38,6 +40,12 @@ float Sensor1Array[ARRAY_SIZE];
 float Sensor2Array[ARRAY_SIZE];
 float Sensor1TimeArray[ARRAY_SIZE];
 float Sensor2TimeArray[ARRAY_SIZE];
+int Sensor1ValidityArray[ARRAY_SIZE];
+int Sensor2ValidityArray[ARRAY_SIZE];
+int Sensor1ValidityTemp = 0;
+int Sensor1ValidityCount = 0;
+int Sensor2ValidityTemp = 0;
+int Sensor2ValidityCount = 0;
 unsigned long timerStart = 0;
 
 /* set initial state */
@@ -53,40 +61,109 @@ bool isTimerReady(int mSec) {
   return (millis() - timerStart) < mSec;
 }
 
-void initArray(float SensorArray[], float SensorTimeArray[]) {
+void initArray(float SensorArray[], float SensorTimeArray[], int SensorValidityArray[]) {
   for (int i = 0; i < ARRAY_SIZE; i++) {
-    SensorArray[i] = ARRAY_INIT_VAL;
+    SensorArray[i] = HOME;
     SensorTimeArray[i] = ARRAY_INIT_VAL;
+    SensorValidityArray[i] = 1;
   }
 }
 
-void updateArray(float SensorArray[], float updateValue, float SensorTimeArray[], float timestamp) {
+void updateArray(float SensorArray[], float updateValue, float SensorTimeArray[], float timestamp, int SensorValidityArray[], int ValidityTemp) {
   for (int i = 0; i < ARRAY_SIZE - 1; i++) {
     SensorArray[i] = SensorArray[i+1];
     SensorTimeArray[i] = SensorTimeArray[i+1];
+    SensorValidityArray[i] = SensorValidityArray[i+1];
   }
   SensorArray[ARRAY_SIZE - 1] = updateValue;
   SensorTimeArray[ARRAY_SIZE - 1] = timestamp;
+  SensorValidityArray[ARRAY_SIZE - 1] = ValidityTemp;
+  //Serial.print("ValidityTemp");
+  //Serial.println(ValidityTemp);
 }
 
-float avrArray(float SensorArray[], float SensorTimeArray[]) {
+float avrArray(float SensorArray[], float SensorTimeArray[], int SensorValidityArray[]) {
   float AvrValue = 0;
   int counter = 0;
+  int invalidcounter = 0;
+  int timeoutindex = 0;
+  int invalidloop = 0;
   while (SensorTimeArray[ARRAY_SIZE - 1 - counter] > (SensorTimeArray[ARRAY_SIZE - 1] - SENSOR_LOOKBACK)){
-    AvrValue += SensorArray[ARRAY_SIZE - 1 - counter];
-    counter += 1; 
+    timeoutindex = ARRAY_SIZE - 1 - counter;
+    if (SensorValidityArray[ARRAY_SIZE - 1 - counter] == 1){
+      AvrValue += SensorArray[ARRAY_SIZE - 1 - counter];
+      counter += 1; 
+    }
+    else {
+      counter += 1;
+      invalidcounter += 1;
+    }
   }
-  return ((float)((int)((AvrValue / (float)counter) * 10)/1)/10) ;
+  while (invalidloop < invalidcounter){
+    if (SensorValidityArray[timeoutindex - invalidloop] == 1){
+      AvrValue += SensorArray[timeoutindex - invalidloop];
+      invalidloop += 1; 
+      //Serial.println(AvrValue)
+    }
+    else { 
+      invalidloop += 1;
+      invalidcounter += 1;
+    }
+    if ((timeoutindex - invalidloop) < 2){
+      break;
+    }
+    
+  }
+  return ((float)((int)((AvrValue / (float)(counter + invalidloop - invalidcounter)) * 10)/1)/10) ;
 }
 
-float checkSensorValue(float SensorValue) {
+float checkSensorValue(float SensorValue, int SensorValidityArray[], int &ValidityTemp, int &ValidityCount) {
   if (SensorValue > MAX or SensorValue < 0) {
     SensorValue = HOME;
+    ValidityTemp = 0;
+    ValidityCount += 1;
+    //Serial.println("Should be a 0 validity");
+    //Serial.print("Validity Count: ");
+    //Serial.println(ValidityCount);
     return SensorValue;
   }
   else {
+    ValidityTemp = 1;
+    ValidityCount = 0;
+    //Serial.println("Should be a 1 validity");
     return SensorValue/MAX;
   }
+}
+
+void checkValidity(float SensorArray[], int SensorValidityArray[], int ValidityCount) {
+  if ((SensorValidityArray[ARRAY_SIZE - 1] == 1) != 1) {
+    if (ValidityCount == VALIDITYTHRESH) {
+      for (int i = 0; i < VALIDITYTHRESH; i++) {
+        SensorValidityArray[ARRAY_SIZE - 1 - i] = 1;
+        ValidityCount = 0; 
+        //Serial.println("Validity Threshold reached, converting validity values");
+      }
+    }
+    else if ( SensorArray[ARRAY_SIZE - 2] == 0.5 and SensorValidityArray[ARRAY_SIZE - 2] == 1){
+      SensorValidityArray[ARRAY_SIZE - 1] = 1;
+    }
+  }
+}
+
+void printArray(float SensorArray[]) {
+  for (int i = 0; i < ARRAY_SIZE - 1; i++) {
+    Serial.print(SensorArray[i]);
+    Serial.print(" ");
+  }
+  Serial.println(" ");
+}
+
+void printArray(int SensorArray[]) {
+  for (int i = 0; i < ARRAY_SIZE - 1; i++) {
+    Serial.print(SensorArray[i]);
+    Serial.print(" ");
+  }
+  Serial.println(" ");
 }
 
 void setup() {
@@ -94,8 +171,8 @@ void setup() {
   pinMode(echoPin1, INPUT);
   pinMode(echoPin2, INPUT);
   DDRD = B11111111; // set PORTD (triggers) to outputs
-  initArray(Sensor1Array, Sensor1TimeArray);
-  initArray(Sensor2Array, Sensor2TimeArray);
+  initArray(Sensor1Array, Sensor1TimeArray, Sensor1ValidityArray);
+  initArray(Sensor2Array, Sensor2TimeArray, Sensor2ValidityArray);
 }
 
 void loop() {
@@ -122,10 +199,17 @@ void loop() {
     /*Measures the time that ping took to return to the receiver and processes the data.*/
     case ECHO_HIGH1: {
         PORTD = B00000000;
-        updateArray(Sensor1Array, checkSensorValue(((int) pulseIn(echoPin1, HIGH) / SMOOTH) * SMOOTH), Sensor1TimeArray, millis());
-        timeDuration1 = avrArray(Sensor1Array, Sensor1TimeArray);
+        //Serial.println("SENSOR1");
+        timeDuration1 =  checkSensorValue((((int) pulseIn(echoPin1, HIGH) / SMOOTH) * SMOOTH), Sensor1ValidityArray, Sensor1ValidityTemp, Sensor1ValidityCount);
+        updateArray(Sensor1Array, timeDuration1, Sensor1TimeArray, millis(), Sensor1ValidityArray, Sensor1ValidityTemp);
+        checkValidity(Sensor1Array, Sensor1ValidityArray, Sensor1ValidityCount);
+        timeDuration1 = avrArray(Sensor1Array, Sensor1TimeArray, Sensor1ValidityArray);
         Serial.print(timeDuration1);
         Serial.println(timeDuration2);
+        //printArray(Sensor1Array);
+        //printArray(Sensor1TimeArray);
+        //printArray(Sensor1ValidityArray);
+        //Serial.println("END SENSOR 1");
         _sensorState = TRIG_LOW2;
         delay(DELAY_TIME);
       } break;
@@ -145,10 +229,17 @@ void loop() {
       } break;
     case ECHO_HIGH2: {
         PORTD = B00000000;
-        updateArray(Sensor2Array, checkSensorValue(((int) pulseIn(echoPin2, HIGH) / SMOOTH) * SMOOTH), Sensor2TimeArray, millis());
-        timeDuration2 = avrArray(Sensor2Array, Sensor2TimeArray);
+        //Serial.println("SENSOR 2");
+        timeDuration2 = checkSensorValue((((int) pulseIn(echoPin2, HIGH) / SMOOTH) * SMOOTH),Sensor2ValidityArray, Sensor2ValidityTemp, Sensor2ValidityCount);
+        updateArray(Sensor2Array, timeDuration2, Sensor2TimeArray, millis(), Sensor2ValidityArray, Sensor2ValidityTemp);
+        checkValidity(Sensor2Array, Sensor2ValidityArray, Sensor2ValidityCount);
+        timeDuration2 = avrArray(Sensor2Array, Sensor2TimeArray, Sensor2ValidityArray);
         Serial.print(timeDuration1);
         Serial.println(timeDuration2);
+        //printArray(Sensor2Array);
+        //printArray(Sensor2TimeArray);
+        //printArray(Sensor2ValidityArray);
+        //Serial.println("END SENSOR 2");
         _sensorState = TRIG_LOW1;
         delay(DELAY_TIME);
       } break;
